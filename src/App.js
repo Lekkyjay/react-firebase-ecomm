@@ -27,6 +27,7 @@ function App() {
               ...snapShot.data()
             }
           })
+          console.log('snapshotState:', currentUser);
         })
       } else { setCurrentUser(authUser) }
     })
