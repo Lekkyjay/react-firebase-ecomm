@@ -8,7 +8,7 @@ import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import Header from './components/header/header.component';
 
-import { auth } from './firebase/firebase.utils';
+import { auth, firestore, createUserProfileDocument } from './firebase/firebase.utils';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null)
@@ -16,15 +16,35 @@ function App() {
   // let unsubscribeFromAuth = null
 
   useEffect(() => {
-    const unsubscribeFromAuth = auth.onAuthStateChanged(authUser => {
-      authUser ? setCurrentUser(authUser) : setCurrentUser(null)
+    const unsubscribeFromAuth = auth.onAuthStateChanged(async authUser => {
+      if (authUser) {
+        const userRef = await createUserProfileDocument(authUser)
+        
+        userRef.onSnapshot(snapShot => {
+          setCurrentUser({
+            currentUser: {
+              id: snapShot.id,
+              ...snapShot.data()
+            }
+          })
+        })
+      } else { setCurrentUser(authUser) }
     })
     return () => {
       unsubscribeFromAuth();
+      // userRef();
     }
   }, [])
 
   console.log('currentUser:', currentUser);
+
+  // firestore.doc('/users/ppOIbTl4hXgjKxoRpxxM/cartItems/EseKQMXJcMjPzxZH3KzG')
+  // firestore.collection('/users/ppOIbTl4hXgjKxoRpxxM/cartItems')
+  // firestore
+  //   .collection('users')
+  //   .doc('ppOIbTl4hXgjKxoRpxxM')
+  //   .collection('cartItems')
+  //   .doc('EseKQMXJcMjPzxZH3KzG')
 
   return (
     <div>
