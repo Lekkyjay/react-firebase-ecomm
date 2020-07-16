@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import './App.css';
@@ -11,7 +11,7 @@ import Header from './components/header/header.component';
 
 import { auth, firestore, createUserProfileDocument } from './firebase/firebase.utils';
 
-import { setCurrentUser } from './redux/user/userAction';
+import { setCurrentUser } from './redux/user/userActions';
 
 class App extends React.Component {
   unsubscribeFromAuth = null;
@@ -46,18 +46,27 @@ class App extends React.Component {
         <Switch>
           <Route exact path='/' component={HomePage} />
           <Route path='/shop' component={ShopPage} />
-          <Route path='/signin' component={SignInAndSignUpPage} />
+          <Route exact path='/signin' render={() => 
+            this.props.currentUser ? 
+            ( <Redirect to='/' /> ) : ( <SignInAndSignUpPage /> ) } 
+          />
         </Switch>
       </div>
     );
   }
 }
 
+//Destructure user out of state
+const mapStateToProps = ({ user }) => ({
+  currentUser: user.currentUser
+});
+
 const mapDispatchToProps = dispatch => ({
   setCurrentUser: user => dispatch(setCurrentUser(user))
 });
 
+//connecting mapStateToProps to our App makes currentUser available as this.props.currentUser
 export default connect(
-  null,
+  mapStateToProps, 
   mapDispatchToProps
 )(App);
